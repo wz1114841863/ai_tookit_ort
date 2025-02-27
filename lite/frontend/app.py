@@ -16,16 +16,23 @@ if uploaded_file is not None:
 
     files = {"file": uploaded_file}
 
-    with st.spinner("正在识别中"):
-        try:
+    try:
+        # 显式重置文件指针
+        uploaded_file.seek(0)
+
+        # 构建符合要求的文件参数
+        files = {
+            "file": (uploaded_file.name, uploaded_file.getvalue(), uploaded_file.type)
+        }
+
+        with st.spinner("正在识别中"):
             response = requests.post(FASTAPI_URL, files=files)
+
             if response.status_code == 200:
-                result = response.json().get("result", "无返回结果")
                 st.subheader("识别结果")
-                st.write(result)
+                st.write(response.json())
             else:
-                st.error(f"请求失败, 状态码: {response.status_conde}")
-        except requests.exceptions.RequestException as e:
-            st.error(f"请求出错:{str(e)}")
-        except Exception as e:
-            st.error(f"发生未知错误:{str(e)}")
+                st.error(f"请求失败,状态码:{response.status_code}")
+
+    except Exception as e:
+        st.error(f"发生错误:{str(e)}")

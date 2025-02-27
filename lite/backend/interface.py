@@ -1,5 +1,6 @@
 import os
 import tempfile
+import numpy as np
 import cv2 as cv
 from fastapi import FastAPI, UploadFile, HTTPException, File
 from fastapi.responses import JSONResponse
@@ -19,24 +20,30 @@ async def test_interface(
     params: str = None,
 ):
     """ 对图像输入进行测试 """
-    allowed_types = ["image/jpeg", "image/png", "image/jpg",]
-    print(file.content_type)
-    print(file)
+    # allowed_types = ["image/jpeg", "image/png", "image/jpg",]
+    # print(file.content_type)
+    # print(file)
     # if file.content_type not in allowed_types:
     #     raise HTTPException(status_code=400, detail="仅支持图片")
 
     try:
-        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-            contents = await file.read()
-            temp_file.write(contents)
-            temp_path = temp_file.name
+        # 直接读取字节数据(无需临时文件)
+        contents = await file.read()
+
+        # 将字节流转换为OpenCV格式
+        nparr = np.frombuffer(contents, np.uint8)
+        mat = cv.imdecode(nparr, cv.IMREAD_COLOR)
+
+        # 检查图像是否有效
+        if mat is None:
+            raise HTTPException(status_code=400, detail="无法解析图像内容")
+
+        print(mat.shape)  # 确保此处有输出
 
         onnx_path = "./lite/hub/ort/age_googlenet.onnx"
         net = AgeGoogleNet(onnx_path, 2)
-        mat = cv.imread(temp_path)
-        print(mat.shape)
         result = net.detect(mat)
-        return {"result": {result.age}}
+        return {"result": str(result.age)}
 
     except Exception as e:
         return JSONResponse(
