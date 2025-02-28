@@ -7,13 +7,13 @@ class BoundingBoxType:
         self.y1 = y1
         self.x2 = x2
         self.y2 = y2
-        self.score = 0.
+        self.score = 0.0
         self.label_txt = ""
         self.label = 0
         self.flag = False
 
     def iou_of(self, other):
-        """ calculate iou """
+        """calculate iou"""
         x1 = max(self.x1, other.x1)
         y1 = max(self.y1, other.y1)
         x2 = min(self.x2, other.x2)
@@ -64,11 +64,40 @@ Landmarks3D = Landmarks3DType
 
 
 class AgeType:
+    """used for AgeGoogleNet"""
+
     def __init__(self):
         self.age: float = 0.0
         self.age_interval: list[int] = [0, 0]
         self.interval_prob: float = 0.0
         self.flag: bool = False
 
+    def __str__(self):
+        return f"""
+            Age.age          : {self.age},
+            Age.age_interval : {self.age_interval},
+            Age.interval_prob: {self.interval_prob}
+        """
+
 
 Age = AgeType
+
+
+class ImageContentType:
+    """used for object classification"""
+
+    def __init__(self):
+        self.scores = []  # sorted
+        self.texts = []
+        self.labels = []
+        self.flag = False
+
+    def __str__(self):
+        return f"""
+            Content.scores: {self.scores},
+            Content.texts : {self.texts},
+            Content.labels: {self.labels}
+        """
+
+
+ClassificationContent = ImageContentType
