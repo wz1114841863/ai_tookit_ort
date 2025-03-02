@@ -35,6 +35,7 @@ class MobileNetV2(BasicOrtHandler):
         )
         tensor_logits = output_tensors[0]
         softmax_probs, max_id = softmax(tensor_logits[0])
+        print(max_id)
         sorted_indics = np.argsort(softmax_probs)
 
         content = ClassificationContent()
@@ -47,9 +48,9 @@ class MobileNetV2(BasicOrtHandler):
 
 
 if __name__ == "__main__":
-    onnx_path = "lite/hub/ort/mobilenetv2.onnx"
+    onnx_path = "lite/hub/ort/mobilenet.onnx"
     net = MobileNetV2(onnx_path, 2)
     img_path = "./resources/cat.jpg"
     img = cv.imread(img_path)
-    content = net.detect(img, 1)
+    content = net.detect(img, 5)
     print(content)
