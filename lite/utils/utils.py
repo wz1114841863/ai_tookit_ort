@@ -2,12 +2,6 @@ import onnx
 import numpy as np
 
 
-def check_onnxfile(onnx_path):
-    """ 检查onnx文件的正确性 """
-    onnx_model = onnx.load(onnx_path)
-    onnx.checker.check_model(onnx_model)
-
-
 def softmax(logits):
     """
     计算Softmax概率并返回最大概率的索引.
