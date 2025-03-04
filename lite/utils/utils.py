@@ -1,5 +1,7 @@
 import onnx
 import numpy as np
+import cv2 as cv
+from lite.utils import BBox
 
 
 def softmax(logits):
@@ -18,9 +20,161 @@ def softmax(logits):
     return softmax_probs, max_id
 
 
+def hard_nms(input_boxes, iou_threshold, topk):
+    """Hard-NMS, 输入的BBox输入tupes.BBox类型"""
+    if not input_boxes:
+        return []
+
+    input_boxes.sort(key=lambda x: x.score, reverse=True)
+    box_num = len(input_boxes)
+    merged = [False] * box_num
+    output = []
+
+    count = 0
+    for i in range(box_num):
+        if merged[i]:
+            continue
+
+        buf = [input_boxes[i]]
+        merged[i] = True
+
+        for j in range(i + 1, box_num):
+            if merged[j]:
+                continue
+
+            iou = input_boxes[i].iou_of(input_boxes[j])
+            if iou > iou_threshold:
+                merged[j] = 1
+                buf.append(input_boxes[j])
+
+        output.append(buf[0])
+
+        # Keep top k
+        count += 1
+        if count >= topk:
+            break
+
+    return output
+
+
+def blending_nms(input_boxes, iou_threshold, topk):
+    """加权平均NMS"""
+    if not input_boxes:
+        return []
+
+    input_boxes.sort(key=lambda x: x.score, reverse=True)
+    box_num = len(input_boxes)
+    merged = [False] * box_num
+    output = []
+    count = 0
+
+    for i in range(box_num):
+        if merged[i]:
+            continue
+        buf = [input_boxes[i]]
+        merged[i] = 1
+
+        for j in range(i + 1, box_num):
+            if merged[j]:
+                continue
+            iou = input_boxes[i].iou_of(input_boxes[j])
+            if iou > iou_threshold:
+                merged[j] = 1
+                buf.append(input_boxes[j])
+
+        # 计算加权平均
+        total = sum(np.exp(box.score) for box in buf)
+        bbox = BBox(0.0, 0.0, 0.0, 0.0)
+        bbox.score = 0.0
+        bbox.flag = True
+
+        for box in buf:
+            rate = np.exp(box.score) / total
+            bbox.x1 += box.x1 * rate
+            bbox.y1 += box.y1 * rate
+            bbox.x2 += box.x2 * rate
+            bbox.y2 += box.y2 * rate
+            bbox.score += box.score * rate
+
+        output.append(bbox)
+        count += 1
+        if count >= topk:
+            break
+
+    return output
+
+
+def offset_nms(input_boxes, iou_threshold, topk):
+    """Offset-NMS"""
+    if not input_boxes:
+        return []
+
+    input_boxes.sort(key=lambda x: x.score, reverse=True)
+    box_num = len(input_boxes)
+    merged = [False] * box_num
+
+    offset = 4096.0
+    for box in input_boxes:
+        offset_ = float(box.label * offset)
+        box.x1 += offset_
+        box.y1 += offset_
+        box.x2 += offset_
+        box.y2 += offset_
+
+    output = []
+    count = 0
+    for i in range(box_num):
+        if merged[i]:
+            continue
+        buf = [input_boxes[i]]
+        merged[i] = 1
+
+        for j in range(i + 1, box_num):
+            if merged[j]:
+                continue
+
+            iou = input_boxes[i].iou_of(input_boxes[j])
+            if iou > iou_threshold:
+                merged[j] = 1
+                buf.append(input_boxes[j])
+
+        output.append(buf[0])
+        count += 1
+        if count >= topk:
+            break
+
+    # Subtract offset
+    for box in output:
+        fset_ = float(box.label * offset)
+        box.x1 -= offset_
+        box.y1 -= offset_
+        box.x2 -= offset_
+        box.y2 -= offset_
+
+    return output
+
+
+def draw_boxes(mat, boxes):
+    if len(boxes) == 0:
+        return
+    for box in boxes:
+        if box.flag:
+            cv.rectangle(mat, box.tl(), box.rb(), (255, 255, 0), 2)
+            if box.label_txt:
+                label_txt = f"{box.label_txt}: {box.score:.4f}"
+                cv.putText(
+                    mat,
+                    label_txt,
+                    box.tl(),
+                    cv.FONT_HERSHEY_SIMPLEX,
+                    0.6,
+                    (0, 255, 0),
+                    2,
+                )
+
+
 if __name__ == "__main__":
     onnx_path = "./lite/hub/ort/age_googlenet.onnx"
-    check_onnxfile(onnx_path)
 
     logits = np.array([2.0, 1.0, 0.1])
     probs, max_id = softmax(logits)

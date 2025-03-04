@@ -14,34 +14,38 @@ class BoundingBoxType:
 
     def iou_of(self, other):
         """calculate iou"""
-        x1 = max(self.x1, other.x1)
-        y1 = max(self.y1, other.y1)
-        x2 = min(self.x2, other.x2)
-        y2 = min(self.y2, other.y2)
+        inner_x1 = max(self.x1, other.x1)
+        inner_y1 = max(self.y1, other.y1)
+        inner_x2 = min(self.x2, other.x2)
+        inner_y2 = min(self.y2, other.y2)
 
-        inter_area = max(0, x2 - x1) * max(0, y2 - y1)
+        inter_area = max(0, inner_x2 - inner_x1) * max(0, inner_y2 - inner_y1)
         self_area = self.width() * self.height()
         other_area = other.width() * other.height()
 
         return inter_area / (self_area + other_area - inter_area)
 
     def width(self):
-        pass
+        return self.x2 - self.x1
 
     def height(self):
-        pass
+        return self.y2 - self.y1
 
     def area(self):
-        pass
+        return abs(self.width() * self.height())
 
     def rect(self):
-        pass
+        """返回OpenCV格式的矩形区域"""
+        return (self.x1, self.y1, self.width(), self.height())
 
     def tl(self):
-        pass
+        return (int(self.x1), int(self.y1))
 
     def rb(self):
-        pass
+        return (int(self.x2), int(self.y2))
+
+
+BBox = BoundingBoxType
 
 
 class LandmarksType:

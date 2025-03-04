@@ -5,7 +5,14 @@ import onnxruntime as ort
 from enum import Enum
 from lite.core import BasicOrtHandler
 from lite.core import DataFormat, create_tensor, normalize
-from lite.utils import ClassificationContent, softmax, YOLOX_CLASSES
+from lite.utils import (
+    BBox,
+    YOLOX_CLASSES,
+    hard_nms,
+    blending_nms,
+    offset_nms,
+    draw_boxes,
+)
 
 
 class YoloXAnchor:
@@ -53,7 +60,7 @@ class YoloX(BasicOrtHandler):
 
     def resize_unscale(self, mat, target_height, target_width):
         """等比例缩放图像,使用114填充其余四周"""
-        if mat.empty():
+        if mat.size == 0:
             return
         img_height, img_width = mat.shape[:2]
         mat_rs = np.full((target_height, target_width, 3), 114, dtype=np.uint8)
@@ -77,8 +84,16 @@ class YoloX(BasicOrtHandler):
         sacle_params = YoloXScaleParams(r, dw, dh, new_unpad_w, new_unpad_h, True)
         return mat_rs, sacle_params
 
-    def generate_anchors(self, target_height, target_width, strides, anchors):
-        pass
+    def generate_anchors(self, target_height, target_width, strides):
+        anchors = []
+        for stride in strides:
+            num_grid_w = target_width // stride
+            num_grid_h = target_height // stride
+            for g1 in range(num_grid_h):
+                for g0 in range(num_grid_w):
+                    anchor = YoloXAnchor(g0, g1, stride)
+                    anchors.append(anchor)
+        return anchors
 
     def generate_bboxes(
         self,
@@ -88,10 +103,85 @@ class YoloX(BasicOrtHandler):
         img_height,
         img_width,
     ):
-        pass
+        pred = output_tensors[0]
+        # print(f"type of pred: {type(pred)}, shape of pred: {pred.shape}")
+        pred_dims = self.output_node_dims[0]
+        num_anchores = pred_dims[1]
+        num_classes = pred_dims[2] - 5
+        input_height = self.input_node_dims[2]
+        input_width = self.input_node_dims[3]
 
-    def nms(data_in, data_output, iou_threshold, topk, nms_type):
-        pass
+        strides = [8, 16, 32]
+        anchors = self.generate_anchors(input_height, input_width, strides)
+
+        r_ = scale_params.r
+        dw_ = scale_params.dw
+        dh_ = scale_params.dh
+
+        bbox_collection = []
+        count = 0
+        for i in range(num_anchores):
+            obj_conf = pred[0, i, 4]
+            if obj_conf < score_threshold:
+                continue
+
+            cls_conf = pred[0, i, 5]
+            label = 0
+            for j in range(num_classes):
+                tmp_conf = pred[0, i, j + 5]
+                if tmp_conf > cls_conf:
+                    cls_conf = tmp_conf
+                    label = j
+            conf = obj_conf * cls_conf
+            if conf < score_threshold:
+                continue
+
+            grid0 = anchors[i].grid0
+            grid1 = anchors[i].grid1
+            stride = anchors[i].stride
+
+            dx = pred[0, i, 0]
+            dy = pred[0, i, 1]
+            dw = pred[0, i, 2]
+            dh = pred[0, i, 3]
+
+            cx = (dx + float(grid0)) * float(stride)
+            cy = (dy + float(grid1)) * float(stride)
+            w = np.exp(dw) * float(stride)
+            h = np.exp(dh) * float(stride)
+            x1 = ((cx - w / 2.0) - float(dw_)) / r_
+            y1 = ((cy - h / 2.0) - float(dh_)) / r_
+            x2 = ((cx + w / 2.0) - float(dw_)) / r_
+            y2 = ((cy + h / 2.0) - float(dh_)) / r_
+
+            bbox = BBox(
+                max(0.0, x1),
+                max(0.0, y1),
+                min(x2, img_width - 1.0),
+                min(y2, img_height - 1),
+            )
+            bbox.score = conf
+            bbox.label = label
+            bbox.label_txt = YOLOX_CLASSES[label]
+            bbox.flag = True
+            bbox_collection.append(bbox)
+
+            count += 1
+            if count > self.max_nms:
+                break
+
+        return bbox_collection
+
+    def nms(self, input_bboxs, iou_threshold, topk, nms_type):
+        if nms_type == NMS.BLEND:
+            output_bboxs = blending_nms(input_bboxs, iou_threshold, topk)
+        elif nms_type == NMS.HARD:
+            output_bboxs = hard_nms(input_bboxs, iou_threshold, topk)
+        elif nms_type == NMS.OFFSET:
+            output_bboxs = offset_nms(input_bboxs, iou_threshold, topk)
+        else:
+            raise ValueError(f"未实现的NMS方法: {nms_type}")
+        return output_bboxs
 
     def detect(
         self,
@@ -101,7 +191,7 @@ class YoloX(BasicOrtHandler):
         topk=100,
         nms_type=NMS.OFFSET,
     ):
-        if mat.empty():
+        if mat.size == 0:
             return
         input_height = self.input_node_dims[2]
         input_width = self.input_node_dims[3]
@@ -109,7 +199,7 @@ class YoloX(BasicOrtHandler):
         mat_rs, scale_params = self.resize_unscale(mat, input_height, input_width)
 
         input_tensor = self.transform(mat_rs)
-        output_tensors = self.ort_sessionrun(
+        output_tensors = self.ort_session.run(
             self.output_node_names,
             {self.input_name: input_tensor},
         )
@@ -117,4 +207,14 @@ class YoloX(BasicOrtHandler):
             scale_params, output_tensors, score_threashold, img_height, img_width
         )
         detected_boxes = self.nms(bbox_collection, iou_threshold, topk, nms_type)
-        return bbox_collection
+        return detected_boxes
+
+
+if __name__ == "__main__":
+    onnx_file = "lite/hub/ort/yolox_tiny.onnx"
+    img_path = "resources/test_lite_yolox_1.jpg"
+    yolox = YoloX(onnx_file)
+    img = cv.imread(img_path)
+    results = yolox.detect(img)
+    draw_boxes(img, results)
+    cv.imwrite("./test.jpg", img)
