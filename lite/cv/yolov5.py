@@ -7,7 +7,7 @@ from lite.core import BasicOrtHandler
 from lite.core import DataFormat, create_tensor, normalize
 from lite.utils import (
     BBox,
-    YOLOX_CLASSES,
+    YOLOV5_CLASSES,
     hard_nms,
     blending_nms,
     offset_nms,
@@ -15,14 +15,7 @@ from lite.utils import (
 )
 
 
-class YoloXAnchor:
-    def __init__(self, grid0, grid1, stride):
-        self.grid0 = grid0
-        self.grid1 = grid1
-        self.stride = stride
-
-
-class YoloXScaleParams:
+class Yolov5ScaleParams:
     def __init__(self, r, dw, dh, new_unpad_w, new_unpad_h, flag):
         self.r = r
         self.dw = dw
@@ -38,19 +31,15 @@ class NMS(Enum):
     OFFSET = 2
 
 
-class YoloX(BasicOrtHandler):
-    """YoloX: https://github.com/Megvii-BaseDetection/YOLOX"""
+class Yolov5(BasicOrtHandler):
+    """Yolov5: https://github.com/ultralytics/yolov5"""
 
     def __init__(self, onnx_path, num_threads=1):
         super().__init__(onnx_path, num_threads)
-
-        self.mean = [255.0 * 0.485, 255.0 * 0.456, 255.0 * 0.406]
-        self.scale_value = [
-            1 / (255.0 * 0.229),
-            1 / (255.0 * 0.224),
-            1 / (255.0 * 0.225),
-        ]
+        self.mean = 0.0
+        self.scale_value = 1.0 / 255.0
         self.max_nms = 30000
+        self.classes = YOLOV5_CLASSES
 
     def transform(self, mat):
         mat = cv.cvtColor(mat, cv.COLOR_BGR2RGB)
@@ -81,19 +70,8 @@ class YoloX(BasicOrtHandler):
         new_unpad_mat = cv.resize(mat, (new_unpad_w, new_unpad_h))
         mat_rs[dh : dh + new_unpad_h, dw : dw + new_unpad_w] = new_unpad_mat
 
-        sacle_params = YoloXScaleParams(r, dw, dh, new_unpad_w, new_unpad_h, True)
+        sacle_params = Yolov5ScaleParams(r, dw, dh, new_unpad_w, new_unpad_h, True)
         return mat_rs, sacle_params
-
-    def generate_anchors(self, target_height, target_width, strides):
-        anchors = []
-        for stride in strides:
-            num_grid_w = target_width // stride
-            num_grid_h = target_height // stride
-            for g1 in range(num_grid_h):
-                for g0 in range(num_grid_w):
-                    anchor = YoloXAnchor(g0, g1, stride)
-                    anchors.append(anchor)
-        return anchors
 
     def generate_bboxes(
         self,
@@ -108,11 +86,6 @@ class YoloX(BasicOrtHandler):
         pred_dims = self.output_node_dims[0]
         num_anchores = pred_dims[1]
         num_classes = pred_dims[2] - 5
-        input_height = self.input_node_dims[2]
-        input_width = self.input_node_dims[3]
-
-        strides = [8, 16, 32]
-        anchors = self.generate_anchors(input_height, input_width, strides)
 
         r_ = scale_params.r
         dw_ = scale_params.dw
@@ -136,19 +109,15 @@ class YoloX(BasicOrtHandler):
             if conf < score_threshold:
                 continue
 
-            grid0 = anchors[i].grid0
-            grid1 = anchors[i].grid1
-            stride = anchors[i].stride
-
             dx = pred[0, i, 0]
             dy = pred[0, i, 1]
             dw = pred[0, i, 2]
             dh = pred[0, i, 3]
 
-            cx = (dx + float(grid0)) * float(stride)
-            cy = (dy + float(grid1)) * float(stride)
-            w = np.exp(dw) * float(stride)
-            h = np.exp(dh) * float(stride)
+            cx = dx
+            cy = dy
+            w = dw
+            h = dh
             x1 = ((cx - w / 2.0) - float(dw_)) / r_
             y1 = ((cy - h / 2.0) - float(dh_)) / r_
             x2 = ((cx + w / 2.0) - float(dw_)) / r_
@@ -162,7 +131,7 @@ class YoloX(BasicOrtHandler):
             )
             bbox.score = conf
             bbox.label = label
-            bbox.label_txt = YOLOX_CLASSES[label]
+            bbox.label_txt = YOLOV5_CLASSES[label]
             bbox.flag = True
             bbox_collection.append(bbox)
 
@@ -211,11 +180,10 @@ class YoloX(BasicOrtHandler):
 
 
 if __name__ == "__main__":
-    onnx_file = "lite/hub/ort/yolox_nano.onnx"
-    # onnx_file = "lite/hub/ort/yolox_tiny.onnx"
+    onnx_file = "lite/hub/ort/yolov5s.onnx"
     img_path = "resources/test_lite_yolox_1.jpg"
-    yolox = YoloX(onnx_file)
+    yolov5 = Yolov5(onnx_file)
     img = cv.imread(img_path)
-    results = yolox.detect(img)
+    results = yolov5.detect(img)
     draw_boxes(img, results)
     cv.imwrite("./test.jpg", img)

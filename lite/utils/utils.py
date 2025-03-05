@@ -173,6 +173,30 @@ def draw_boxes(mat, boxes):
                 )
 
 
+def draw_age(mat, age):
+    if not age.flag:
+        return
+    offset = int(0.1 * mat.shape[0])
+    age_text = f"Age: {age.age}"
+    interval_text = f"Interval {age.age_interval[0]}-{age.age_interval[1]}"
+    prob = f"Prob: {age.interval_prob:.4f}"
+    cv.putText(
+        mat, age_text, (10, offset), cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2
+    )
+    cv.putText(
+        mat,
+        interval_text,
+        (10, offset * 2),
+        cv.FONT_HERSHEY_SIMPLEX,
+        0.6,
+        (255, 0, 0),
+        2,
+    )
+    cv.putText(
+        mat, prob, (10, offset * 3), cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2
+    )
+
+
 if __name__ == "__main__":
     onnx_path = "./lite/hub/ort/age_googlenet.onnx"
 

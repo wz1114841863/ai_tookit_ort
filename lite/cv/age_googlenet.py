@@ -4,7 +4,7 @@ import onnxruntime as ort
 
 from lite.core import BasicOrtHandler
 from lite.core import DataFormat, create_tensor, normalize
-from lite.utils import Age, softmax
+from lite.utils import Age, softmax, draw_age
 
 
 class AgeGoogleNet(BasicOrtHandler):
@@ -63,4 +63,5 @@ if __name__ == "__main__":
     img_path = "./resources/test_lite_age_googlenet.jpg"
     img = cv.imread(img_path)
     age = net.detect(img)
-    print(age.age)
+    draw_age(img, age)
+    cv.imwrite("./test_age_googlenet.jpg", img)
