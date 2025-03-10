@@ -1,7 +1,7 @@
 import onnx
 import numpy as np
 import cv2 as cv
-from lite.utils import BBox
+from lite.utils import BBox, Keypoint
 
 
 def softmax(logits):
@@ -194,6 +194,18 @@ def draw_age(mat, age):
     )
     cv.putText(
         mat, prob, (10, offset * 3), cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2
+    )
+
+
+def draw_keypoint(mat, KeypointCoordinate):
+    if not KeypointCoordinate.flag:
+        return
+    cv.circle(
+        mat,
+        (KeypointCoordinate.x, KeypointCoordinate.y),
+        radius=1,
+        color=(0, 0, 255),
+        thickness=-1,
     )
 
 

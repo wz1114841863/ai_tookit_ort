@@ -49,6 +49,8 @@ BBox = BoundingBoxType
 
 
 class LandmarksType:
+    """used for save coordinate"""
+
     def __init__(self):
         self.points: list[cv.Point2f] = []
         self.flag: bool = False
@@ -59,6 +61,8 @@ Landmarks2D = LandmarksType
 
 
 class Landmarks3DType:
+    """used for save 3D coordinate"""
+
     def __init__(self):
         self.points: list[cv.Point3f] = []
         self.flag: bool = False
@@ -105,3 +109,22 @@ class ImageContentType:
 
 
 ClassificationContent = ImageContentType
+
+
+class KeypointCoordinateType:
+    """used for 2D Keypoint Coordinate"""
+
+    def __init__(self, x=0.0, y=0.0, score=0.0, flag=False):
+        self.x = x
+        self.y = y
+        self.score = score
+        self.flag = flag
+
+    def __str__(self):
+        return f"""
+            Keypoint.coordinate: {self.x, self.y},
+            Keypoint.score: {self.score}
+        """
+
+
+Keypoint = KeypointCoordinateType
