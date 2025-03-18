@@ -128,3 +128,16 @@ class KeypointCoordinateType:
 
 
 Keypoint = KeypointCoordinateType
+
+
+class EmotionsType:
+    """used for Emotions"""
+
+    def __init__(self, score, label, text, flag):
+        self.score = score
+        self.label = label
+        self.text = text
+        self.flag = flag
+
+
+Emotions = EmotionsType
