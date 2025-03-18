@@ -226,6 +226,55 @@ def draw_keypoint(mat, KeypointCoordinate):
     )
 
 
+def draw_axis(mat, euler_angles, size=50, thickness=(2, 2, 2)):
+    if not euler_angles.flag:
+        return
+
+    pitch = np.radians(euler_angles.pitch)
+    yaw = -np.radians(euler_angles.yaw)  # yaw取反
+    roll = np.radians(euler_angles.roll)
+
+    # 获取图像的中心点
+    height, width = mat.shape[:2]
+    tdx = int(width / 2.0)
+    tdy = int(height / 2.0)
+
+    # 计算X轴（红色）
+    x1 = int(size * np.cos(yaw) * np.cos(roll)) + tdx
+    y1 = (
+        int(
+            size
+            * (
+                np.cos(pitch) * np.sin(roll)
+                + np.cos(roll) * np.sin(pitch) * np.sin(yaw)
+            )
+        )
+        + tdy
+    )
+
+    # 计算Y轴（绿色）
+    x2 = int(-size * np.cos(yaw) * np.sin(roll)) + tdx
+    y2 = (
+        int(
+            size
+            * (
+                np.cos(pitch) * np.cos(roll)
+                - np.sin(pitch) * np.sin(yaw) * np.sin(roll)
+            )
+        )
+        + tdy
+    )
+
+    # 计算Z轴（蓝色）
+    x3 = int(size * np.sin(yaw)) + tdx
+    y3 = int(-size * np.cos(yaw) * np.sin(pitch)) + tdy
+
+    # 绘制坐标轴
+    cv.line(mat, (tdx, tdy), (x1, y1), (0, 0, 255), thickness[0])  # X轴（红色）
+    cv.line(mat, (tdx, tdy), (x2, y2), (0, 255, 0), thickness[1])  # Y轴（绿色）
+    cv.line(mat, (tdx, tdy), (x3, y3), (255, 0, 0), thickness[2])  # Z轴（蓝色
+
+
 if __name__ == "__main__":
     onnx_path = "./lite/hub/ort/age_googlenet.onnx"
 

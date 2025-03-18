@@ -141,3 +141,29 @@ class EmotionsType:
 
 
 Emotions = EmotionsType
+
+
+class EulerAnglesType:
+    """used for head engle"""
+
+    def __init__(self, yaw, pitch, roll, flag):
+        self.yaw = yaw
+        self.pitch = pitch
+        self.roll = roll
+        self.flag = flag
+
+
+EulerAngles = EulerAnglesType
+
+
+class GenderType:
+    """used for genders"""
+
+    def __init__(self, score, label, text, flag):
+        self.score = score
+        self.label = label
+        self.text = text
+        self.flag = flag
+
+
+Gender = GenderType
