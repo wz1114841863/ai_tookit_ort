@@ -52,8 +52,8 @@ class LandmarksType:
     """used for save coordinate"""
 
     def __init__(self):
-        self.points: list[cv.Point2f] = []
-        self.flag: bool = False
+        self.points = []
+        self.flag = False
 
 
 Landmarks = LandmarksType
@@ -64,8 +64,8 @@ class Landmarks3DType:
     """used for save 3D coordinate"""
 
     def __init__(self):
-        self.points: list[cv.Point3f] = []
-        self.flag: bool = False
+        self.points = []
+        self.flag = False
 
 
 Landmarks3D = Landmarks3DType

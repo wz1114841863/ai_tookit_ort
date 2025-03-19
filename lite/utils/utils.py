@@ -173,6 +173,20 @@ def draw_boxes(mat, boxes):
                 )
 
 
+def draw_landmarks(mat, landmarks):
+    """
+    在图像上绘制landmarks
+    :param mat: 输入的图像 (OpenCV Mat格式)
+    :param landmarks: LandmarksType对象, 包含坐标点和标志位
+    :return: 绘制了landmarks的图像
+    """
+    if landmarks.points is None or not landmarks.flag:
+        return mat
+
+    for p in landmarks.points:
+        cv.circle(mat, (int(p[0]), int(p[1])), 2, (0, 255, 0), -1)
+
+
 def draw_age(mat, age):
     if not age.flag:
         return

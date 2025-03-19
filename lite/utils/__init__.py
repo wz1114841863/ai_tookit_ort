@@ -1,6 +1,7 @@
 from .type import (
     BBox,
     Age,
+    Landmarks,
     ClassificationContent,
     Keypoint,
     Emotions,
@@ -15,6 +16,7 @@ from .utils import (
     offset_nms,
     draw_boxes,
     draw_age,
+    draw_landmarks,
     draw_keypoint,
     draw_emotion,
     draw_axis,
