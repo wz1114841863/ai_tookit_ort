@@ -1,7 +1,7 @@
 import onnx
 import numpy as np
 import cv2 as cv
-from lite.utils import BBox, Keypoint
+from lite.utils import BBox, Keypoint, Gender
 
 
 def softmax(logits):
@@ -217,6 +217,23 @@ def draw_emotion(mat, emtion):
     offset = int(0.1 * mat.shape[0])
     emotion_text = f"Emotion: {emtion.text}"
     prob = f"Prob: {emtion.score}"
+    cv.putText(
+        mat,
+        f"{emotion_text} : {prob}",
+        (10, offset),
+        cv.FONT_HERSHEY_SIMPLEX,
+        0.6,
+        (0, 255, 0),
+        2,
+    )
+
+
+def draw_gender(mat, gender):
+    if not gender.flag:
+        return
+    offset = int(0.1 * mat.shape[0])
+    emotion_text = f"Gender: {gender.text}"
+    prob = f"Prob: {gender.score}"
     cv.putText(
         mat,
         f"{emotion_text} : {prob}",

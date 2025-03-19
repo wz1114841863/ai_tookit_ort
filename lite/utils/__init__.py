@@ -20,6 +20,7 @@ from .utils import (
     draw_keypoint,
     draw_emotion,
     draw_axis,
+    draw_gender,
 )
 
 from .classify_classes import *

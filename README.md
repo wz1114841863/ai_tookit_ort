@@ -7,4 +7,5 @@
 6. emotion_ferplus: 情绪识别
 7. fsanet: 人脸的欧拉角识别
 8. pfld106：人脸关键点识别
-9. 
+9. ssrnet: 年龄识别
+10. gender_googlenet: 性别识别
