@@ -10,4 +10,5 @@
 9. ssrnet: 年龄识别
 10. gender_googlenet: 性别识别
 11. subpixel_cnn: 超分辨率网络
-12. 
+12. age_vgg16: 年龄检测
+13. gender_vgg16: 性别检测
