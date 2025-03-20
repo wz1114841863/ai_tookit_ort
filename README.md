@@ -9,3 +9,5 @@
 8. pfld106：人脸关键点识别
 9. ssrnet: 年龄识别
 10. gender_googlenet: 性别识别
+11. subpixel_cnn: 超分辨率网络
+12. 
