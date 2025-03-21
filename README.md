@@ -12,3 +12,5 @@
 11. subpixel_cnn: 超分辨率网络
 12. age_vgg16: 年龄检测
 13. gender_vgg16: 性别检测
+14. fast_style_transfer: 艺术风格转换
+15.

@@ -7,6 +7,7 @@ from .type import (
     Emotions,
     EulerAngles,
     Gender,
+    StyleContent,
 )
 
 from .utils import (

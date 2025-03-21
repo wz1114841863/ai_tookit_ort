@@ -167,3 +167,14 @@ class GenderType:
 
 
 Gender = GenderType
+
+
+class StyleContentType:
+    """used for fast style transfer"""
+
+    def __init__(self, mat, flag=True):
+        self.mat = mat
+        self.flag = flag
+
+
+StyleContent = StyleContentType
