@@ -178,3 +178,26 @@ class StyleContentType:
 
 
 StyleContent = StyleContentType
+
+
+class FaceContentType:
+    """used for glint_arcface"""
+
+    def __init__(self, embedding, dim, flag=True):
+        self.embedding = embedding
+        self.dim = dim
+        self.flag = flag
+
+
+FaceContent = FaceContentType
+
+
+class ColorizeContentType:
+    """Colorize content"""
+
+    def __init__(self, mat, flag=True):
+        self.mat = mat
+        self.flag = flag
+
+
+ColorizeContent = ColorizeContentType

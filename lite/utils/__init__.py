@@ -8,6 +8,8 @@ from .type import (
     EulerAngles,
     Gender,
     StyleContent,
+    FaceContent,
+    ColorizeContent,
 )
 
 from .utils import (
@@ -15,6 +17,7 @@ from .utils import (
     hard_nms,
     blending_nms,
     offset_nms,
+    cosine_similarity,
     draw_boxes,
     draw_age,
     draw_landmarks,

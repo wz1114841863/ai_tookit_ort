@@ -173,6 +173,20 @@ def draw_boxes(mat, boxes):
                 )
 
 
+def cosine_similarity(vec1, vec2):
+    if len(vec1) == 0 or len(vec2) == 0:
+        print("len(vec1) == 0 or len(vec2) == 0.")
+        return None
+    vec1 = np.array(vec1)
+    vec2 = np.array(vec2)
+
+    dot_product = np.dot(vec1, vec2)
+    norm_vector1 = np.linalg.norm(vec1)
+    norm_vector2 = np.linalg.norm(vec2)
+    cosine_similarity = dot_product / (norm_vector1 * norm_vector2)
+    return cosine_similarity
+
+
 def draw_landmarks(mat, landmarks):
     """
     在图像上绘制landmarks

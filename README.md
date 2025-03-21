@@ -13,4 +13,6 @@
 12. age_vgg16: 年龄检测
 13. gender_vgg16: 性别检测
 14. fast_style_transfer: 艺术风格转换
-15.
+15. glint_arcface: 人脸相似度计算
+16. colorize：图像上色
+17. 
