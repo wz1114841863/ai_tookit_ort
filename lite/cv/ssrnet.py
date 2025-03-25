@@ -18,6 +18,7 @@ class SSRNet(BasicOrtHandler):
     def transform(self, mat):
         """将图像转为模型输入"""
         canvas = cv.resize(mat, (self.input_node_dims[3], self.input_node_dims[2]))
+        canvas = canvas.astype(np.float32) / 255.0
         canvas = cv.cvtColor(canvas, cv.COLOR_BGR2RGB)
         canvas = normalize(canvas, self.mean_val, self.scale_val)
         input_tensor = create_tensor(canvas, self.input_node_dims, DataFormat.CHW)
@@ -35,6 +36,7 @@ class SSRNet(BasicOrtHandler):
 
         age_tensor = output_tensors[0]
         pred_age = age_tensor[0]
+        print(pred_age)
         interval_min = int(pred_age if pred_age - 2.0 > 0.0 else 0.0)
         interval_max = int(pred_age if pred_age + 3.0 < 100.0 else 100.0)
 
@@ -48,7 +50,7 @@ class SSRNet(BasicOrtHandler):
 
 if __name__ == "__main__":
     onnx_path = "./lite/hub/ort/ssrnet.onnx"
-    img_path = "./resources/test_lite_ssrnet.jpg"
+    img_path = "./resources/test_lite_facefusion_pipeline_source.jpg"
 
     net = SSRNet(onnx_path)
     img = cv.imread(img_path)

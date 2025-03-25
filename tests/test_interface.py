@@ -8,7 +8,7 @@ files = {
         "/home/wz/AI/ai_tookit_ort/resources/test_lite_age_googlenet.jpg", "rb"
     )
 }
-data = {"network_name": "GenderVGG16"}
+data = {"network_name": "FastStyleTransfer"}
 
 response = requests.post(url, files=files, data=data)
 if response.status_code == 200:

@@ -53,10 +53,10 @@ name2network = {
         "lite/hub/ort/style-udnie-8.onnx",
         None,
     ),
-    "FSANet": ModelInfo(  # TODO, 需要特殊处理
+    "FSANet": ModelInfo(
         FSANet,
         "lite/hub/ort/fsanet-var.onnx",
-        None,
+        draw_axis,
     ),
     "GenderGoogleNet": ModelInfo(
         GenderGoogleNet,
@@ -78,7 +78,7 @@ name2network = {
         "lite/hub/ort/ssrnet.onnx",
         draw_age,
     ),
-    "SubPixelCNN": ModelInfo(  # TODO: 接口得处理一下， 针对None的方法， 需要统一封装返回mat
+    "SubPixelCNN": ModelInfo(
         SubPixelCNN,
         "lite/hub/ort/subpixel-cnn.onnx",
         None,
@@ -94,7 +94,7 @@ name2network = {
         draw_boxes,
     ),
 }
-print(name2network.keys())
+
 app = FastAPI()
 
 
@@ -124,9 +124,26 @@ async def test_interface(
             raise HTTPException(
                 status_code=400, detail=f"不支持的网络名称{network_name}"
             )
-        # 假设所有模型都接受一个onnx路径作为参数，这里使用默认路径
         model_info = name2network[network_name]
-        result = model_info.net.detect(mat)
+
+        if network_name == "FSANet":
+            """对FSANet需要进行特殊处理"""
+            conv_onnx_path = "lite/hub/ort/fsanet-1x1.onnx"
+
+            var_model = model_info.net
+            var_results = var_model.detect(mat)
+
+            conv_model = FSANet(conv_onnx_path)
+            conv_results = conv_model.detect(mat)
+
+            yaw = (var_results.yaw + conv_results.yaw) / 2.0
+            pitch = (var_results.pitch + conv_results.pitch) / 2.0
+            roll = (var_results.roll + conv_results.roll) / 2.0
+            flag = var_results.flag and conv_results.flag
+
+            result = EulerAngles(yaw, pitch, roll, flag)
+        else:
+            result = model_info.net.detect(mat)
 
         if model_info.draw_method:
             model_info.draw_method(mat, result)

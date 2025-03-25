@@ -201,3 +201,14 @@ class ColorizeContentType:
 
 
 ColorizeContent = ColorizeContentType
+
+
+class PixelContentType:
+    """Colorize content"""
+
+    def __init__(self, mat, flag=True):
+        self.mat = mat
+        self.flag = flag
+
+
+PixelContent = ColorizeContentType

@@ -4,7 +4,7 @@ import onnxruntime as ort
 
 from lite.core import BasicOrtHandler
 from lite.core import DataFormat, create_tensor, normalize
-from lite.utils import Age, draw_age
+from lite.utils import PixelContent
 
 
 class SubPixelCNN(BasicOrtHandler):
@@ -44,7 +44,8 @@ class SubPixelCNN(BasicOrtHandler):
         super_resolution_mat = cv.merge(out_mats)
 
         super_resolution_mat = cv.cvtColor(super_resolution_mat, cv.COLOR_YCrCb2BGR)
-        return super_resolution_mat
+        result = PixelContent(super_resolution_mat, True)
+        return result
 
 
 if __name__ == "__main__":
@@ -54,4 +55,4 @@ if __name__ == "__main__":
     model = SubPixelCNN(onnx_file)
     img = cv.imread(img_path)
     results = model.detect(img)
-    cv.imwrite("./test.jpg", results)
+    cv.imwrite("./test.jpg", results.mat)

@@ -10,6 +10,7 @@ from .type import (
     StyleContent,
     FaceContent,
     ColorizeContent,
+    PixelContent,
 )
 
 from .utils import (
