@@ -98,6 +98,11 @@ name2network = {
         "lite/hub/ort/mobilenetv2.onnx",
         draw_label,
     ),
+    "ShuffleNetV2": ModelInfo(
+        ShuffleNetV2,
+        "lite/hub/ort/shufflenet-v2-10.onnx",
+        draw_label,
+    ),
 }
 
 app = FastAPI()

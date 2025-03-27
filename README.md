@@ -15,4 +15,5 @@
 14. fast_style_transfer: 艺术风格转换
 15. glint_arcface: 人脸相似度计算
 16. colorize：图像上色
-17. 
+17. MobilenetV2: 图像分类
+18. ShuffleNetV2: 图像分类
