@@ -230,7 +230,7 @@ def draw_emotion(mat, emtion):
         return
     offset = int(0.1 * mat.shape[0])
     emotion_text = f"Emotion: {emtion.text}"
-    prob = f"Prob: {emtion.score}"
+    prob = f"Prob: {emtion.score:.4f}"
     cv.putText(
         mat,
         f"{emotion_text} : {prob}",
@@ -247,10 +247,28 @@ def draw_gender(mat, gender):
         return
     offset = int(0.1 * mat.shape[0])
     emotion_text = f"Gender: {gender.text}"
-    prob = f"Prob: {gender.score}"
+    prob = f"Prob: {gender.score:.4f}"
     cv.putText(
         mat,
         f"{emotion_text} : {prob}",
+        (10, offset),
+        cv.FONT_HERSHEY_SIMPLEX,
+        0.6,
+        (0, 255, 0),
+        2,
+    )
+
+
+def draw_label(mat, content):
+    """绘制ClassificationContent的第一个元素标签和类型"""
+    if not content.flag:
+        return
+    offset = int(0.1 * mat.shape[0])
+    class_text = f"class: {content.texts[0]}"
+    prob = f"Prob: {content.scores[0]:.4f}"
+    cv.putText(
+        mat,
+        f"{class_text} : {prob}",
         (10, offset),
         cv.FONT_HERSHEY_SIMPLEX,
         0.6,

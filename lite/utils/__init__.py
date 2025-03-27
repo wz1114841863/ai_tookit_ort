@@ -26,6 +26,7 @@ from .utils import (
     draw_emotion,
     draw_axis,
     draw_gender,
+    draw_label,
 )
 
 from .classify_classes import *

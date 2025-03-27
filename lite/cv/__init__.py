@@ -13,6 +13,7 @@ from .ssrnet import SSRNet
 from .subpixel_cnn import SubPixelCNN
 from .yolov5 import Yolov5
 from .yolox import YoloX
+from .mobilenetv2 import MobileNetV2
 
 
 __all__ = [name for name in globals() if not name.startswith("_")]

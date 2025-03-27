@@ -26,6 +26,7 @@ NETWORK_OPTIONS = [
     "SubPixelCNN",
     "Yolov5",
     "YoloX",
+    "MobileNetV2",
 ]
 
 uploaded_file = st.file_uploader("请选择要上传的图片", type=["jpg", "jpeg", "png"])

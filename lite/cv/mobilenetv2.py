@@ -4,7 +4,7 @@ import onnxruntime as ort
 
 from lite.core import BasicOrtHandler
 from lite.core import DataFormat, create_tensor, normalize
-from lite.utils import ClassificationContent, softmax, MOBILENET_CLASSES
+from lite.utils import ClassificationContent, softmax, MOBILENET_CLASSES, draw_label
 
 
 class MobileNetV2(BasicOrtHandler):
@@ -12,13 +12,14 @@ class MobileNetV2(BasicOrtHandler):
 
     def __init__(self, onnx_path, num_threads=1):
         super().__init__(onnx_path, num_threads)
-        self.mean_val = np.array([0.5, 0.5, 0.5])
-        self.scale_val = np.array([1 / 0.5, 1 / 0.5, 1 / 0.5])
+        self.mean_val = np.array([0.485, 0.456, 0.406])
+        self.scale_val = np.array([1 / 0.229, 1 / 0.224, 1 / 0.225])
         self.classes = MOBILENET_CLASSES
 
     def transform(self, mat):
         canvas = cv.resize(mat, (self.input_node_dims[3], self.input_node_dims[2]))
         canvas = cv.cvtColor(canvas, cv.COLOR_BGR2RGB)
+        canvas = canvas.astype(np.float32) / 255.0
         canvas = normalize(canvas, self.mean_val, self.scale_val)
         input_tensor = create_tensor(canvas, self.input_node_dims, DataFormat.CHW)
         return input_tensor
@@ -35,9 +36,8 @@ class MobileNetV2(BasicOrtHandler):
         )
         tensor_logits = output_tensors[0]
         softmax_probs, max_id = softmax(tensor_logits[0])
-        print(max_id)
-        sorted_indics = np.argsort(softmax_probs)
-
+        # print(max_id)
+        sorted_indics = np.argsort(-softmax_probs)
         content = ClassificationContent()
         for i in range(top_k):
             content.labels.append(sorted_indics[i])
@@ -48,9 +48,11 @@ class MobileNetV2(BasicOrtHandler):
 
 
 if __name__ == "__main__":
-    onnx_path = "lite/hub/ort/mobilenet.onnx"
+    onnx_path = "lite/hub/ort/mobilenetv2.onnx"
+    img_path = "./resources/test_lite_ssd_mobilenetv1.png"
+
     net = MobileNetV2(onnx_path, 2)
-    img_path = "./resources/cat.jpg"
     img = cv.imread(img_path)
     content = net.detect(img, 5)
-    print(content)
+    draw_label(img, content)
+    cv.imwrite("./test.jpg", img)

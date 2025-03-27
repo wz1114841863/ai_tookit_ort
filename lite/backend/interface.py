@@ -93,6 +93,11 @@ name2network = {
         "lite/hub/ort/yolox_nano.onnx",
         draw_boxes,
     ),
+    "MobileNetV2": ModelInfo(
+        MobileNetV2,
+        "lite/hub/ort/mobilenetv2.onnx",
+        draw_label,
+    ),
 }
 
 app = FastAPI()
