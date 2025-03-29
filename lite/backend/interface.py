@@ -103,6 +103,11 @@ name2network = {
         "lite/hub/ort/shufflenet-v2-10.onnx",
         draw_label,
     ),
+    "EfficientDetAnchor": ModelInfo(
+        EfficientDetAnchor,
+        "lite/hub/ort/efficientdet-d7.onnx",
+        draw_boxes,
+    ),
 }
 
 app = FastAPI()

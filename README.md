@@ -17,3 +17,19 @@
 16. colorize：图像上色
 17. MobilenetV2: 图像分类
 18. ShuffleNetV2: 图像分类
+19.
+
+
+## 添加网络流程
+1. lite/cv/目录下添加对应的模型文件，包括前处理、模型推理、后处理和测试步骤
+2. 下载对应的onnx文件添加到hub/ort
+3. 在lite/backend中添加对应的模型处理流程
+4. 在lite/frontend中添加对应的网络模型名称用于调用
+
+
+## 启动流程
+后端采用FastAPI
+python -m lite.backend.interface
+
+前端采用Streamlit
+streamlit run ./lite/fronted/app.py

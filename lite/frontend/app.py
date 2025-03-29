@@ -28,6 +28,7 @@ NETWORK_OPTIONS = [
     "YoloX",
     "MobileNetV2",
     "ShuffleNetV2",
+    "EfficientDetAnchor",
 ]
 
 uploaded_file = st.file_uploader("请选择要上传的图片", type=["jpg", "jpeg", "png"])
