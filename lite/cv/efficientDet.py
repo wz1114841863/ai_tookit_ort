@@ -160,6 +160,7 @@ class EfficientDetAnchor(BasicOrtHandler):
         canvas = cv.resize(mat, (self.input_node_dims[3], self.input_node_dims[2]))
         canvas = cv.cvtColor(canvas, cv.COLOR_BGR2RGB)
         canvas = canvas.astype(np.float32) / 255.0
+        canvas = normalize(canvas, self.mean_val, self.scale_val)
         input_tensor = create_tensor(canvas, self.input_node_dims, DataFormat.CHW)
         return input_tensor
 

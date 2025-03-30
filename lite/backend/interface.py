@@ -14,6 +14,9 @@ class ModelInfo:
         self.model_name = model_name
         self.onnx_path = onnx_path
         self.draw_method = draw_method
+        # 这里会导致提前加载模型，可以提升推理速度
+        # 但是会占用更多的计算资源，资源有限时可以
+        # 在调用网络模型时，在加载网络
         self.net = self.model_name(onnx_path)
 
 
@@ -106,6 +109,11 @@ name2network = {
     "EfficientDetAnchor": ModelInfo(
         EfficientDetAnchor,
         "lite/hub/ort/efficientdet-d7.onnx",
+        draw_boxes,
+    ),
+    "SSD": ModelInfo(
+        SSD,
+        "lite/hub/ort/ssd-10.onnx",
         draw_boxes,
     ),
 }

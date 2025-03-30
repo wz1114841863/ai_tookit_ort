@@ -17,8 +17,9 @@
 16. colorize：图像上色
 17. MobilenetV2: 图像分类
 18. ShuffleNetV2: 图像分类
-19.
-
+19. EfficientDetAnchor: 目标检测网络
+20. SSD: 目标检测网络
+21.
 
 ## 添加网络流程
 1. lite/cv/目录下添加对应的模型文件，包括前处理、模型推理、后处理和测试步骤
