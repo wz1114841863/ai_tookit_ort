@@ -30,6 +30,7 @@ NETWORK_OPTIONS = [
     "ShuffleNetV2",
     "EfficientDetAnchor",
     "SSD",
+    "Resnet",
 ]
 
 uploaded_file = st.file_uploader("请选择要上传的图片", type=["jpg", "jpeg", "png"])

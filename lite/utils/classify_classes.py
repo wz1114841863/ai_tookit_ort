@@ -2345,3 +2345,5 @@ SSD_CLASSES = [
     "hair drier",
     "toothbrush",
 ]
+
+RESNET_CLASSES = MOBILENET_CLASSES

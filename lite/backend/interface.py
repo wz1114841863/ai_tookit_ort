@@ -116,6 +116,11 @@ name2network = {
         "lite/hub/ort/ssd-10.onnx",
         draw_boxes,
     ),
+    "Resnet": ModelInfo(
+        Resnet,
+        "lite/hub/ort/resnet18.onnx",
+        draw_label,
+    ),
 }
 
 app = FastAPI()

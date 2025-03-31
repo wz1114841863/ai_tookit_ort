@@ -19,7 +19,7 @@
 18. ShuffleNetV2: 图像分类
 19. EfficientDetAnchor: 目标检测网络
 20. SSD: 目标检测网络
-21.
+21. Resnet: 目标检测网络
 
 ## 添加网络流程
 1. lite/cv/目录下添加对应的模型文件，包括前处理、模型推理、后处理和测试步骤
@@ -34,3 +34,6 @@ python -m lite.backend.interface
 
 前端采用Streamlit
 streamlit run ./lite/fronted/app.py
+
+## ONNX 文件链接
+[谷歌drive](https://drive.google.com/drive/folders/1p6uBcxGeyS1exc-T61vL8YRhwjYL4iD2)

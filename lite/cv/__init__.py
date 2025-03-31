@@ -17,6 +17,7 @@ from .mobilenetv2 import MobileNetV2
 from .shufflenetv2 import ShuffleNetV2
 from .efficientDet import EfficientDetAnchor
 from .ssd import SSD
+from .resnet import Resnet
 
 
 __all__ = [name for name in globals() if not name.startswith("_")]
